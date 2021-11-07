@@ -1,0 +1,140 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.Experimental.Rendering.Universal;
+
+public class Player : MonoBehaviour
+{
+    public float sanity = 100f;
+    float elapsed = 0f;
+
+    [SerializeField]
+    Image sanityBar;
+
+    Vector2 velocity;
+    Rigidbody2D rb;
+
+    [SerializeField]
+    public float speed;
+
+    [SerializeField]
+    CanvasGroup watch;
+
+    [SerializeField]
+    AudioSource[] footsteps;
+    int stepCount = 0;
+
+    [SerializeField]
+    Light2D globalLight;
+    [SerializeField]
+    Light2D flashLight;
+
+    [SerializeField]
+    Flashlight flashlightObject;
+
+    [SerializeField]
+    AudioSource collectItem;
+
+    SpriteRenderer _renderer;
+
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        _renderer = GetComponent<Rigidbody2D>();
+        velocity = Vector2.zero;
+    }
+
+    void Update()
+    {
+        Move();
+        Sanity();
+    }
+
+    void Move()
+    {
+        if (watch.alpha == 0)
+        {
+            // Move player
+            float x = Input.GetAxisRaw("Horizontal");
+            float moveBy = x * speed;
+            rb.velocity = new Vector2(moveBy, rb.velocity.y);
+
+            if (x > 0)
+            {
+                _renderer.flipX = false;
+            }
+
+            // Play footsteps if moving
+            if (x != 0f)
+            {
+                if (!footsteps[0].isPlaying && !footsteps[1].isPlaying)
+                {
+                    footsteps[stepCount].Play();
+                    stepCount++;
+                    if (stepCount > 1)
+                        stepCount = 0;
+                }
+            }
+        }
+    }
+
+    void Sanity()
+    {
+        elapsed += Time.deltaTime;
+        if (elapsed >= 1f)
+        {
+            elapsed = 0f;
+            if (watch.alpha == 1)
+            {
+                // Sanity is regained when watch is open
+                if (sanity < 100f)
+                {
+                    // Sanity loss increases with no light
+                    if (globalLight.enabled || flashLight.enabled)
+                        sanity += 2f;
+                    else
+                        sanity += 1f;
+                }
+            }
+            else
+            {
+                if (sanity > 0f)
+                {
+                    // Sanity loss increases with no light
+                    if (globalLight.enabled || flashLight.enabled)
+                        sanity -= 1f;
+                    else
+                        sanity -= 2f;
+                }
+            }
+            UpdateSanity();
+        }
+    }
+
+    // Update UI sanity bar
+    public void UpdateSanity()
+    {
+        sanityBar.fillAmount = sanity / 100f;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        //Debug.Log(collision.gameObject.name);
+    }
+
+    public void CollectItem(Collectable.Item item)
+    {
+        collectItem.Play();
+
+        switch (item)
+        {
+            case Collectable.Item.flashlight:
+                flashlightObject.ObtainedFlashlight();
+                break;
+            case Collectable.Item.battery:
+                flashlightObject.NewBattery();
+                break;
+        }
+    }
+}
