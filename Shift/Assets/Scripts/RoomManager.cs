@@ -36,8 +36,11 @@ public class RoomManager : MonoBehaviour
     Vector2[] spawnPoints;
     [SerializeField]
     GameObject[] collectables;
+    [SerializeField]
+    GameObject[] enemies;
 
     GameObject spawnedItem;
+    GameObject spawnedEnemy;
 
     Direction direction;
 
@@ -68,8 +71,11 @@ public class RoomManager : MonoBehaviour
         }
         if (spawnedItem != null)
             spawnedItem.GetComponent<Collectable>().DestroyCollectable();
+        if (spawnedEnemy != null)
+            Destroy(spawnedEnemy);
         CheckLights();
         SpawnItem();
+        SpawnEnemy();
     }
 
     void ScreenFade()
@@ -123,6 +129,19 @@ public class RoomManager : MonoBehaviour
                         spawnedItem = Instantiate(itemToSpawn, spawnLocation, Quaternion.identity);
                     break;
             }
+        }
+    }
+
+    void SpawnEnemy()
+    {
+        int spawnChance = Random.Range(0, 5);
+
+        if (spawnChance == 0)
+        {
+            GameObject enemyToSpawn = enemies[Random.Range(0, enemies.Length)];
+            Vector2 spawnLocation = spawnPoints[Random.Range(0, spawnPoints.Length)];
+
+            spawnedEnemy = Instantiate(enemyToSpawn, spawnLocation, Quaternion.identity);
         }
     }
 }

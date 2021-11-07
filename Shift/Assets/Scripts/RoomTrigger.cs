@@ -9,13 +9,15 @@ public class RoomTrigger : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (direction == RoomManager.Direction.left || direction == RoomManager.Direction.right)
+        if (collision.gameObject.tag == "Player" && (direction == RoomManager.Direction.left || direction == RoomManager.Direction.right))
+            FindObjectOfType<RoomManager>().NextRoom(direction);
+        if (collision.gameObject.tag == "Player" && direction == RoomManager.Direction.up && Input.GetKeyDown("w"))
             FindObjectOfType<RoomManager>().NextRoom(direction);
     }
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if (direction == RoomManager.Direction.up && Input.GetKeyDown("w"))
+        if (collision.gameObject.tag == "Player" && direction == RoomManager.Direction.up && Input.GetKeyDown("w"))
             FindObjectOfType<RoomManager>().NextRoom(direction);
     }
 }

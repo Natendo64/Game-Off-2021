@@ -34,10 +34,13 @@ public class Flashlight : MonoBehaviour
     [SerializeField]
     SpriteRenderer spriteRenderer;
 
+    PolygonCollider2D polygonCollider2D;
+
     void Start()
     {
         flashlight = GetComponent<Light2D>();
         flashlightImage = GetComponent<SpriteRenderer>();
+        polygonCollider2D = GetComponent<PolygonCollider2D>();
     }
 
     void Update()
@@ -85,6 +88,8 @@ public class Flashlight : MonoBehaviour
     void Toggle()
     {
         flashlight.enabled = !flashlight.enabled;
+        polygonCollider2D.enabled = !polygonCollider2D.enabled;
+
         flashlightImage.enabled = !flashlightImage.enabled;
         if (flashlight.enabled)
         {
