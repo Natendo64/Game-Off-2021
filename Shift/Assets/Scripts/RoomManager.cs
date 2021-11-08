@@ -45,6 +45,12 @@ public class RoomManager : MonoBehaviour
     Direction direction;
 
     [SerializeField]
+    GameObject[] doorBlocks;
+
+    [SerializeField]
+    Collider2D[] doorTriggers;
+
+    [SerializeField]
     Flashlight flashlight;
 
     public void NextRoom(Direction direction)
@@ -60,10 +66,10 @@ public class RoomManager : MonoBehaviour
         switch (direction)
         {
             case Direction.left:
-                player.transform.position = new Vector2(room.transform.position.x + 7.75f, player.transform.position.y);
+                player.transform.position = new Vector2(room.transform.position.x + 13.25f, player.transform.position.y);
                 break;
             case Direction.right:
-                player.transform.position = new Vector2(room.transform.position.x - 7.75f, player.transform.position.y);
+                player.transform.position = new Vector2(room.transform.position.x - 13.25f, player.transform.position.y);
                 break;
             case Direction.up:
                 player.transform.position = new Vector2(room.transform.position.x, player.transform.position.y);
@@ -76,13 +82,14 @@ public class RoomManager : MonoBehaviour
         CheckLights();
         SpawnItem();
         SpawnEnemy();
+        BlockDoor();
     }
 
     void ScreenFade()
     {
         Sequence sequence = DOTween.Sequence();
         sequence.Append(canvasGroup.DOFade(1, 0.5f));
-        sequence.Append(canvasGroup.DOFade(0, 0.5f));
+        sequence.Append(canvasGroup.DOFade(0, 1f));
         sequence.Play();
     }
 
@@ -127,6 +134,48 @@ public class RoomManager : MonoBehaviour
                 case Collectable.Item.battery:
                     if (flashlight.obtained)
                         spawnedItem = Instantiate(itemToSpawn, spawnLocation, Quaternion.identity);
+                    break;
+            }
+        }
+    }
+
+    void BlockDoor()
+    {
+        int blockChance = Random.Range(0, 2);
+
+        // Turn off each door block
+        foreach (GameObject block in doorBlocks)
+            block.SetActive(false);
+
+        foreach (Collider2D trigger in doorTriggers)
+            trigger.enabled = true;
+
+        if (blockChance == 0)
+        {
+            int blockedDirection = Random.Range(0, 3);
+
+            switch (blockedDirection)
+            {
+                case 0:
+                    if (direction != Direction.right)
+                    {
+                        doorBlocks[0].SetActive(true);
+                        doorTriggers[0].enabled = false;
+                    }
+                    break;
+                case 1:
+                    if (direction != Direction.left)
+                    {
+                        doorBlocks[1].SetActive(true);
+                        doorTriggers[1].enabled = false;
+                    }
+                    break;
+                case 2:
+                    if (direction != Direction.up)
+                    {
+                        doorBlocks[2].SetActive(true);
+                        doorTriggers[2].enabled = false;
+                    }
                     break;
             }
         }
